@@ -1,445 +1,468 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Microbiology Learning Suite</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Microbiology Learning Suite</title>
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
 
-    <style>
-        /* Minimal extra styling or inline CSS. 
-       You can place these in styles.css as well. */
+  <style>
+    /* Minimal custom styling here; 
+       you can move it to styles.css if you prefer. */
 
-        .test-pos {
-            background-color: #198754;
-            /* success (green) */
-            color: white;
-        }
+    .test-pos {
+      background-color: #198754; /* green for positive */
+      color: white;
+    }
+    .test-neg {
+      background-color: #dc3545; /* red for negative */
+      color: white;
+    }
+    .test-var {
+      background-color: #fd7e14; /* orange for variable */
+      color: white;
+    }
 
-        .test-neg {
-            background-color: #dc3545;
-            /* danger (red) */
-            color: white;
-        }
+    .flagella-indicator {
+      position: absolute;
+      width: 4px;
+      height: 30px;
+      background: #666;
+      border-radius: 2px;
+    }
 
-        .test-var {
-            background-color: #fd7e14;
-            /* orange-ish */
-            color: white;
-        }
+    .comparison-card {
+      border: 2px solid #ccc;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
 
-        .flagella-indicator {
-            position: absolute;
-            width: 4px;
-            height: 30px;
-            background: #666;
-            border-radius: 2px;
-        }
+    /* Quiz highlight classes for correct/incorrect */
+    .quiz-option.correct {
+      background: #198754 !important;
+      color: white !important;
+    }
+    .quiz-option.incorrect {
+      background: #dc3545 !important;
+      color: white !important;
+    }
 
-        .comparison-card {
-            border: 2px solid #ccc;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .quiz-option.correct {
-            background: #198754 !important;
-            color: white !important;
-        }
-
-        .quiz-option.incorrect {
-            background: #dc3545 !important;
-            color: white !important;
-        }
-    </style>
+    /* Example for ".test-result" if you want them 
+       centered in a flex container */
+    .test-result {
+      padding: 0.4rem 0.6rem;
+      border-radius: 0.5rem;
+      margin: 0.2rem;
+    }
+  </style>
 </head>
-
 <body>
-    <nav class="navbar navbar-expand-lg bg-primary text-white">
-        <div class="container">
-            <span class="navbar-brand mb-0 h1">Microbe Master</span>
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link text-white mode-link" href="#" data-mode="learn">Learn</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white mode-link" href="#" data-mode="quiz">Quiz</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white mode-link" href="#" data-mode="compare">Compare</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white mode-link" href="#" data-mode="spaced">My Progress</a>
-                </li>
-            </ul>
+  <nav class="navbar navbar-expand-lg bg-primary text-white">
+    <div class="container">
+      <span class="navbar-brand mb-0 h1">Microbe Master 2</span>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link text-white mode-link" href="#" data-mode="learn"
+            >Learn</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white mode-link" href="#" data-mode="quiz"
+            >Quiz</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white mode-link" href="#" data-mode="compare"
+            >Compare</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white mode-link" href="#" data-mode="spaced"
+            >My Progress</a
+          >
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <!-- Learn Mode -->
+    <div id="learnMode" class="mode-section active-mode">
+      <div class="row mb-3">
+        <!-- Category filter for bacterium, virus, parasite, fungus -->
+        <div class="col-md-3">
+          <select id="categoryFilterSelect" class="form-select">
+            <option value="all">All Categories</option>
+            <option value="bacterium">Bacteria</option>
+            <option value="virus">Viruses</option>
+            <option value="parasite">Parasites</option>
+            <option value="fungus">Fungi</option>
+          </select>
         </div>
-    </nav>
-
-    <div class="container my-5">
-        <!-- Learning Mode -->
-        <div id="learnMode" class="mode-section active-mode">
-            <div class="row mb-3">
-                <!-- Category filter -->
-                <div class="col-md-3">
-                    <select id="categoryFilterSelect" class="form-select">
-                        <option value="all">All Categories</option>
-                        <option value="bacterium">Bacteria</option>
-                        <option value="virus">Viruses</option>
-                        <option value="parasite">Parasites</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" id="searchInput" class="form-control"
-                        placeholder="Search by name, disease, etc." />
-                </div>
-                <div class="col-md-3">
-                    <select id="filterStainSelect" class="form-select">
-                        <option value="all">All Gram Stains</option>
-                        <option value="positive">Gram Positive</option>
-                        <option value="negative">Gram Negative</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <!-- Additional filters by system/test or capsule/spore? -->
-                    <select id="miscFilterSelect" class="form-select">
-                        <option value="all">No Additional Filter</option>
-                        <option value="hasCapsule">Has Capsule</option>
-                        <option value="formsSpores">Forms Spores</option>
-                        <!-- Could add "enveloped viruses" or "protozoa" etc. if you like -->
-                    </select>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <select id="filterSystemSelect" class="form-select">
-                        <option value="all">All Systems</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <select id="filterTestSelect" class="form-select">
-                        <option value="all">All Special Tests</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row g-4" id="microbeGrid"></div>
+        <!-- Search input -->
+        <div class="col-md-3">
+          <input
+            type="text"
+            id="searchInput"
+            class="form-control"
+            placeholder="Search by name/disease..."
+          />
         </div>
-
-        <!-- Quiz Mode -->
-        <div id="quizMode" class="mode-section">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title" id="quizQuestion"></h5>
-                    <div id="quizOptions" class="row g-3 mt-3"></div>
-                    <div class="mt-3" id="quizFeedback"></div>
-                </div>
-            </div>
-            <div class="progress-container mb-2" style="height: 8px; background: #e9ecef;">
-                <div class="progress-bar" id="quizProgress" style="height: 100%; background: #6f42c1; width: 0%"></div>
-            </div>
-            <div class="mt-3" id="quizScore">Score: 0/0</div>
+        <!-- Gram filter (only relevant for bacteria) -->
+        <div class="col-md-3">
+          <select id="filterStainSelect" class="form-select">
+            <option value="all">All Gram Stains</option>
+            <option value="positive">Gram Positive</option>
+            <option value="negative">Gram Negative</option>
+          </select>
         </div>
-
-        <!-- Comparison Mode -->
-        <div id="compareMode" class="mode-section">
-            <div class="row mb-3">
-                <div class="col-md-5">
-                    <select id="compareSelect1" class="form-select" size="10"></select>
-                </div>
-                <div class="col-md-2 d-flex align-items-center justify-content-center">
-                    <button class="btn btn-primary" onclick="runComparison()">
-                        Compare &rarr;
-                    </button>
-                </div>
-                <div class="col-md-5">
-                    <select id="compareSelect2" class="form-select" size="10"></select>
-                </div>
-            </div>
-            <div id="comparisonResults" class="comparison-grid"></div>
+        <!-- Capsule/spore/etc. -->
+        <div class="col-md-3">
+          <select id="miscFilterSelect" class="form-select">
+            <option value="all">No Additional Filter</option>
+            <option value="hasCapsule">Has Capsule</option>
+            <option value="formsSpores">Forms Spores</option>
+          </select>
         </div>
+      </div>
 
-        <!-- Spaced Repetition Mode -->
-        <div id="spacedMode" class="mode-section">
-            <h4>Your Study Queue</h4>
-            <ul class="spaced-repetition-list list-unstyled" id="spacedList"></ul>
-            <button class="btn btn-secondary" onclick="updateSpacedRepetition()">
-                Refresh Queue
-            </button>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <select id="filterSystemSelect" class="form-select">
+            <option value="all">All Systems</option>
+          </select>
         </div>
+        <div class="col-md-6">
+          <select id="filterTestSelect" class="form-select">
+            <option value="all">All Special Tests</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row g-4" id="microbeGrid"></div>
     </div>
 
-    <!-- Your data file with 3 arrays: allBacteriaData, allVirusesData, allParasitesData -->
-    <script src="microbes.js"></script>
+    <!-- Quiz Mode -->
+    <div id="quizMode" class="mode-section">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title" id="quizQuestion"></h5>
+          <div id="quizOptions" class="row g-3 mt-3"></div>
+          <div class="mt-3" id="quizFeedback"></div>
+        </div>
+      </div>
+      <div
+        class="progress-container mb-2"
+        style="height: 8px; background: #e9ecef;"
+      >
+        <div
+          class="progress-bar"
+          id="quizProgress"
+          style="height: 100%; background: #6f42c1; width: 0%"
+        ></div>
+      </div>
+      <div class="mt-3" id="quizScore">Score: 0/0</div>
+    </div>
 
-    <script>
-        /**********************************************************
-         * GLOBAL STATE
-         **********************************************************/
-        const STATE = {
-            currentMode: "learn",
-            quiz: {
-                questions: [],
-                current: 0,
-                score: 0,
-                total: 0,
-            },
-            progress: JSON.parse(localStorage.getItem("microbeProgress")) || {},
-            comparison: { microbe1: null, microbe2: null },
-            allSystems: new Set(),
-            allTests: new Set(),
-        };
+    <!-- Compare Mode -->
+    <div id="compareMode" class="mode-section">
+      <div class="row mb-3">
+        <div class="col-md-5">
+          <select id="compareSelect1" class="form-select" size="10"></select>
+        </div>
+        <div class="col-md-2 d-flex align-items-center justify-content-center">
+          <button class="btn btn-primary" onclick="runComparison()">
+            Compare &rarr;
+          </button>
+        </div>
+        <div class="col-md-5">
+          <select id="compareSelect2" class="form-select" size="10"></select>
+        </div>
+      </div>
+      <div id="comparisonResults" class="comparison-grid"></div>
+    </div>
 
-        // Let's combine all three data sets into one universal array
-        let allMicrobes = [];
+    <!-- Spaced Repetition Mode -->
+    <div id="spacedMode" class="mode-section">
+      <h4>Your Study Queue</h4>
+      <ul class="spaced-repetition-list list-unstyled" id="spacedList"></ul>
+      <button class="btn btn-secondary" onclick="updateSpacedRepetition()">
+        Refresh Queue
+      </button>
+    </div>
+  </div>
 
-        document.addEventListener("DOMContentLoaded", init);
+  <!-- Data file with your 4 arrays: allBacteriaData, allVirusesData, allParasitesData, allFungiData -->
+  <script src="microbes.js"></script>
+  <script>
+    /**************************************************************
+     * GLOBAL STATE
+     **************************************************************/
+    const STATE = {
+      currentMode: "learn",
+      quiz: {
+        questions: [],
+        current: 0,
+        score: 0,
+        total: 0,
+      },
+      progress: JSON.parse(localStorage.getItem("microbeProgress")) || {},
+      comparison: { microbe1: null, microbe2: null },
+      allSystems: new Set(),
+      allTests: new Set(),
+    };
 
-        /**********************************************************
-         * INIT
-         **********************************************************/
-        function init() {
-            // Combine all data
-            allMicrobes = [
-                ...allBacteriaData,
-                ...allVirusesData,
-                ...allParasitesData
-            ];
+    // We'll combine them all here
+    let allMicrobes = [];
 
-            setupEventListeners();
-            gatherSystemsAndTests();
-            populateSystemFilter();
-            populateTestFilter();
-            loadComparisonSelects();
-            updateSpacedRepetition();
-            refreshMicrobeGrid(allMicrobes);
+    /**************************************************************
+     * PAGE LOAD
+     **************************************************************/
+    document.addEventListener("DOMContentLoaded", init);
+
+    function init() {
+      // Combine your 4 data arrays:
+      // allBacteriaData, allVirusesData, allParasitesData, allFungiData
+      // Make sure each object has a `category` property.
+      allMicrobes = [
+        ...(window.allBacteriaData || []),
+        ...(window.allVirusesData || []),
+        ...(window.allParasitesData || []),
+        ...(window.allFungiData || []),
+      ];
+
+      // Setup UI
+      setupEventListeners();
+      gatherSystemsAndTests();
+      populateSystemFilter();
+      populateTestFilter();
+      loadComparisonSelects();
+      updateSpacedRepetition();
+      refreshMicrobeGrid(allMicrobes);
+    }
+
+    function setupEventListeners() {
+      // Navbar mode switching
+      document.querySelectorAll(".mode-link").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          STATE.currentMode = link.dataset.mode;
+
+          document.querySelectorAll(".mode-section").forEach((sec) => {
+            sec.classList.remove("active-mode");
+          });
+          document
+            .getElementById(STATE.currentMode + "Mode")
+            .classList.add("active-mode");
+
+          if (STATE.currentMode === "quiz") startQuiz();
+          if (STATE.currentMode === "spaced") updateSpacedRepetition();
+        });
+      });
+
+      // Learn mode filters
+      document
+        .getElementById("categoryFilterSelect")
+        .addEventListener("change", handleFilter);
+      document
+        .getElementById("searchInput")
+        .addEventListener("input", handleFilter);
+      document
+        .getElementById("filterStainSelect")
+        .addEventListener("change", handleFilter);
+      document
+        .getElementById("miscFilterSelect")
+        .addEventListener("change", handleFilter);
+      document
+        .getElementById("filterSystemSelect")
+        .addEventListener("change", handleFilter);
+      document
+        .getElementById("filterTestSelect")
+        .addEventListener("change", handleFilter);
+    }
+
+    /**************************************************************
+     * GATHER SYSTEMS & TESTS
+     **************************************************************/
+    function gatherSystemsAndTests() {
+      allMicrobes.forEach((m) => {
+        if (m.systemsAffected) {
+          m.systemsAffected.forEach((sys) => STATE.allSystems.add(sys));
+        }
+        // Bacterial special tests
+        if (m.specialTests) {
+          Object.keys(m.specialTests).forEach((t) => STATE.allTests.add(t));
+        }
+      });
+    }
+
+    function populateSystemFilter() {
+      const sel = document.getElementById("filterSystemSelect");
+      const sorted = Array.from(STATE.allSystems).sort();
+      let html = '<option value="all">All Systems</option>';
+      sorted.forEach((sys) => {
+        html += `<option value="${sys}">${sys}</option>`;
+      });
+      sel.innerHTML = html;
+    }
+
+    function populateTestFilter() {
+      const sel = document.getElementById("filterTestSelect");
+      const sorted = Array.from(STATE.allTests).sort();
+      let html = '<option value="all">All Special Tests</option>';
+      sorted.forEach((t) => {
+        html += `<option value="${t}">${t.toUpperCase()}</option>`;
+      });
+      sel.innerHTML = html;
+    }
+
+    /**************************************************************
+     * LEARN MODE: FILTER
+     **************************************************************/
+    function handleFilter() {
+      const catVal = document.getElementById("categoryFilterSelect").value;
+      const searchTerm = document
+        .getElementById("searchInput")
+        .value.toLowerCase();
+      const gramVal = document.getElementById("filterStainSelect").value;
+      const miscVal = document.getElementById("miscFilterSelect").value;
+      const sysVal = document.getElementById("filterSystemSelect").value;
+      const testVal = document.getElementById("filterTestSelect").value;
+
+      // Helper: convert anything to a string and lower-case it,
+      // to avoid TypeError if it's an array or something else.
+      function safeLower(val) {
+        if (!val) return "";
+        if (typeof val === "string") return val.toLowerCase();
+        if (Array.isArray(val)) return val.join(" ").toLowerCase();
+        if (typeof val === "object") {
+          // If it's an object, e.g. {size: 5, shape:'round'} => convert to a JSON string
+          return JSON.stringify(val).toLowerCase();
+        }
+        // fallback
+        return String(val).toLowerCase();
+      }
+
+      let filtered = allMicrobes.filter((microbe) => {
+        // 1) Category
+        let matchesCategory =
+          catVal === "all" || microbe.category === catVal;
+
+        // 2) Search in name, diseases, associatedDiseases, systems, maybe morphology
+        const nameLC = safeLower(microbe.name);
+        const diseaseLC = safeLower(microbe.diseases); 
+        const assocLC = safeLower(microbe.associatedDiseases);
+        const morphLC = safeLower(microbe.morphology);
+
+        let matchesSearch =
+          nameLC.includes(searchTerm) ||
+          diseaseLC.includes(searchTerm) ||
+          assocLC.includes(searchTerm) ||
+          morphLC.includes(searchTerm);
+
+        // Also check systemsAffected
+        if (microbe.systemsAffected) {
+          const sysJoined = microbe.systemsAffected.join(" ").toLowerCase();
+          if (sysJoined.includes(searchTerm)) {
+            matchesSearch = true;
+          }
         }
 
-        function setupEventListeners() {
-            // Mode switching
-            document.querySelectorAll(".mode-link").forEach((link) => {
-                link.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    STATE.currentMode = e.target.dataset.mode;
-
-                    // Hide all sections
-                    document.querySelectorAll(".mode-section").forEach((sec) => {
-                        sec.classList.remove("active-mode");
-                    });
-                    // Show the selected mode
-                    document
-                        .getElementById(STATE.currentMode + "Mode")
-                        .classList.add("active-mode");
-
-                    // If quiz mode, start quiz
-                    if (STATE.currentMode === "quiz") startQuiz();
-
-                    // If spaced mode, refresh
-                    if (STATE.currentMode === "spaced") updateSpacedRepetition();
-                });
-            });
-
-            // Learn Mode filters
-            document
-                .getElementById("categoryFilterSelect")
-                .addEventListener("change", handleFilter);
-            document
-                .getElementById("searchInput")
-                .addEventListener("input", handleFilter);
-            document
-                .getElementById("filterStainSelect")
-                .addEventListener("change", handleFilter);
-            document
-                .getElementById("miscFilterSelect")
-                .addEventListener("change", handleFilter);
-            document
-                .getElementById("filterSystemSelect")
-                .addEventListener("change", handleFilter);
-            document
-                .getElementById("filterTestSelect")
-                .addEventListener("change", handleFilter);
+        // 3) Gram filter (only if it's a bacterium)
+        let matchesGram = true;
+        if (microbe.category === "bacterium") {
+          if (gramVal !== "all") {
+            matchesGram = (microbe.gramStain === gramVal);
+          }
+        } else {
+          // If it's not a bacterium and user picked gram pos/neg, let's exclude it
+          if (gramVal !== "all") {
+            matchesGram = false;
+          }
         }
 
-        /**********************************************************
-         * GATHER ALL SYSTEMS & TESTS
-         **********************************************************/
-        function gatherSystemsAndTests() {
-            allMicrobes.forEach((m) => {
-                // Systems
-                if (m.systemsAffected) {
-                    m.systemsAffected.forEach((sys) => STATE.allSystems.add(sys));
-                }
-                // Tests (mostly for bacteria, but safe to check everything)
-                if (m.specialTests) {
-                    Object.keys(m.specialTests).forEach((t) => STATE.allTests.add(t));
-                }
-            });
+        // 4) Additional filter (capsule/spore)
+        let matchesMisc = true;
+        if (miscVal === "hasCapsule") {
+          matchesMisc = !!microbe.capsule;
+        } else if (miscVal === "formsSpores") {
+          matchesMisc = !!microbe.spores;
         }
 
-        function populateSystemFilter() {
-            const select = document.getElementById("filterSystemSelect");
-            const sortedSystems = Array.from(STATE.allSystems).sort();
-            let optionsHtml = `<option value="all">All Systems</option>`;
-            sortedSystems.forEach(
-                (sys) => (optionsHtml += `<option value="${sys}">${sys}</option>`)
-            );
-            select.innerHTML = optionsHtml;
-            select.value = "all";
+        // 5) System filter
+        let matchesSys = true;
+        if (sysVal !== "all") {
+          matchesSys =
+            microbe.systemsAffected &&
+            microbe.systemsAffected.includes(sysVal);
         }
 
-        function populateTestFilter() {
-            const select = document.getElementById("filterTestSelect");
-            const sortedTests = Array.from(STATE.allTests).sort();
-            let optionsHtml = `<option value="all">All Special Tests</option>`;
-            sortedTests.forEach(
-                (t) => (optionsHtml += `<option value="${t}">${t.toUpperCase()}</option>`)
-            );
-            select.innerHTML = optionsHtml;
-            select.value = "all";
-        }
-
-        /**********************************************************
-         * LEARN MODE: FILTER & SEARCH
-         **********************************************************/
-        function handleFilter() {
-            const catFilter = document.getElementById("categoryFilterSelect").value;
-            const searchTerm = document
-                .getElementById("searchInput")
-                .value.toLowerCase();
-            const gramFilter = document.getElementById("filterStainSelect").value;
-            const miscFilter = document.getElementById("miscFilterSelect").value;
-            const systemFilter = document.getElementById("filterSystemSelect").value;
-            const testFilter = document.getElementById("filterTestSelect").value;
-
-            function safeLower(val) {
-                // If val is a string, return lowercase.
-                // If val is an array, we can join it. Otherwise return empty string.
-                if (typeof val === "string") return val.toLowerCase();
-                if (Array.isArray(val)) return val.join(" ").toLowerCase();
-                return "";
+        // 6) testVal for special tests (bacteria)
+        let matchesTest = true;
+        if (testVal !== "all") {
+          // must have specialTests
+          if (!microbe.specialTests) {
+            matchesTest = false;
+          } else {
+            // must be "test-pos" or something not 'test-neg'
+            const tVal = microbe.specialTests[testVal];
+            if (!tVal || tVal === "test-neg") {
+              matchesTest = false;
             }
-
-
-            let filtered = allMicrobes.filter((microbe) => {
-                // 1) category
-                let matchesCategory =
-                    catFilter === "all" || microbe.category === catFilter;
-
-                // 2) search name/diseases or systems
-                let matchesSearch = false;
-                // Name or diseases
-                if (
-                    microbe.name.toLowerCase().includes(searchTerm) ||
-                    (microbe.diseases &&
-                        microbe.diseases.toLowerCase().includes(searchTerm)) ||
-                    (microbe.associatedDiseases &&
-                        microbe.associatedDiseases.toLowerCase().includes(searchTerm))
-                ) {
-                    matchesSearch = true;
-                }
-                // Maybe also check systemsAffected
-                if (microbe.systemsAffected) {
-                    const combinedSys = microbe.systemsAffected.join(" ").toLowerCase();
-                    if (combinedSys.includes(searchTerm)) {
-                        matchesSearch = true;
-                    }
-                }
-                // 3) Gram filter only relevant if it's a bacterium
-                let matchesGram = true;
-                if (microbe.category === "bacterium") {
-                    if (gramFilter !== "all") {
-                        matchesGram = microbe.gramStain === gramFilter;
-                    }
-                } else {
-                    // If it's virus/parasite, we ignore gramFilter
-                    // or treat it as automatically passed
-                    if (gramFilter !== "all") {
-                        matchesGram = false;
-                        // or set to true if you want to ignore the Gram filter for viruses/parasites
-                    }
-                }
-
-                // 4) Additional filter: hasCapsule, formsSpores
-                let matchesMisc = true;
-                if (miscFilter === "hasCapsule") {
-                    matchesMisc = !!microbe.capsule;
-                } else if (miscFilter === "formsSpores") {
-                    matchesMisc = !!microbe.spores;
-                }
-
-                // 5) system filter
-                let matchesSystem = true;
-                if (systemFilter !== "all") {
-                    matchesSystem =
-                        microbe.systemsAffected &&
-                        microbe.systemsAffected.includes(systemFilter);
-                }
-
-                // 6) test filter
-                let matchesTest = true;
-                if (testFilter !== "all") {
-                    if (!microbe.specialTests) {
-                        matchesTest = false;
-                    } else {
-                        // require that microbe has a non-'test-neg' (or something) for that test
-                        const testVal = microbe.specialTests[testFilter];
-                        // e.g. if testVal === "test-pos" => it's positive
-                        // If we want only positives, we can do:
-                        if (!testVal || testVal === "test-neg") {
-                            matchesTest = false;
-                        }
-                    }
-                }
-
-                // Combine
-                return (
-                    matchesCategory &&
-                    matchesSearch &&
-                    matchesGram &&
-                    matchesMisc &&
-                    matchesSystem &&
-                    matchesTest
-                );
-            });
-
-            refreshMicrobeGrid(filtered);
+          }
         }
 
-        function refreshMicrobeGrid(microbeList) {
-            const grid = document.getElementById("microbeGrid");
-            grid.innerHTML = "";
-            if (!microbeList || microbeList.length === 0) {
-                grid.innerHTML = "<p>No microbes found for these filters.</p>";
-                return;
-            }
-            microbeList.forEach((m) => {
-                const card = createMicrobeCard(m);
-                grid.appendChild(card);
-            });
-        }
+        return (
+          matchesCategory &&
+          matchesSearch &&
+          matchesGram &&
+          matchesMisc &&
+          matchesSys &&
+          matchesTest
+        );
+      });
 
-        function createMicrobeCard(microbe) {
-            // We'll put it in a bootstrap column
-            const col = document.createElement("div");
-            col.className = "col-md-6 col-lg-4";
+      refreshMicrobeGrid(filtered);
+    }
 
-            // We'll do a card with color if it's a bacterium with known Gram
-            let cardColorClass = "";
-            if (microbe.category === "bacterium") {
-                cardColorClass =
-                    microbe.gramStain === "positive" ? "gram-positive" : "gram-negative";
-            }
+    function refreshMicrobeGrid(mList) {
+      const grid = document.getElementById("microbeGrid");
+      grid.innerHTML = "";
+      if (!mList || mList.length === 0) {
+        grid.innerHTML = "<p>No microbes found.</p>";
+        return;
+      }
 
-            const card = document.createElement("div");
-            card.className = `microbe-card card mb-3 border-3 ${cardColorClass}`;
+      mList.forEach((m) => {
+        const card = createMicrobeCard(m);
+        grid.appendChild(card);
+      });
+    }
 
-            const categoryLabel = microbe.category.charAt(0).toUpperCase() + microbe.category.slice(1);
+    function createMicrobeCard(microbe) {
+      const col = document.createElement("div");
+      col.className = "col-md-6 col-lg-4";
 
-            card.innerHTML = `
+      let cardColorClass = "";
+      if (microbe.category === "bacterium") {
+        // color if gram pos/neg
+        cardColorClass =
+          microbe.gramStain === "positive" ? "gram-positive" : "gram-negative";
+      }
+
+      const card = document.createElement("div");
+      card.className = `microbe-card card mb-3 border-3 ${cardColorClass}`;
+
+      const categoryLabel =
+        microbe.category.charAt(0).toUpperCase() + microbe.category.slice(1);
+
+      card.innerHTML = `
         <div class="card-body">
           <h5 class="card-title">${microbe.name}</h5>
           ${createMorphologyDiagram(microbe)}
@@ -447,478 +470,510 @@
             <span class="badge bg-info">${categoryLabel}</span>
             ${renderBasicTags(microbe)}
           </div>
-          <button class="btn btn-sm btn-outline-secondary" onclick="toggleDetails(this)">
-            Toggle Details
-          </button>
-          <div class="details mt-3" style="display: none;">
+          <button class="btn btn-sm btn-outline-secondary" onclick="toggleDetails(this)">Toggle Details</button>
+          <div class="details mt-3" style="display:none;">
             ${renderDetails(microbe)}
           </div>
         </div>
       `;
 
-            col.appendChild(card);
-            return col;
+      col.appendChild(card);
+      return col;
+    }
+
+    function toggleDetails(btn) {
+      const detailsDiv = btn.parentElement.querySelector(".details");
+      if (!detailsDiv) return;
+      if (detailsDiv.style.display === "none") {
+        detailsDiv.style.display = "block";
+        btn.textContent = "Hide Details";
+      } else {
+        detailsDiv.style.display = "none";
+        btn.textContent = "Toggle Details";
+      }
+    }
+
+    /**************************************************************
+     * MORPHOLOGY DIAGRAM
+     **************************************************************/
+    function createMorphologyDiagram(microbe) {
+      let shapeHTML = "";
+      let color = "#6f42c1";
+
+      if (microbe.category === "bacterium") {
+        // color by gram
+        color = microbe.gramStain === "negative" ? "#d63384" : "#6f42c1";
+        // "morphology" might be "coccus" or "bacillus" or something else
+        const shape = (microbe.morphology || "").toLowerCase();
+        if (shape.includes("cocci") || shape.includes("coccus")) {
+          shapeHTML = `<div style="width:30px;height:30px;background:${color};border-radius:50%;"></div>`;
+        } else {
+          // default rectangle
+          shapeHTML = `<div style="width:60px;height:20px;background:${color};border-radius:3px;"></div>`;
         }
-
-        function renderBasicTags(microbe) {
-            // For bacteria, show Gram stain, capsule, spores
-            // For viruses, show envelope yes/no, family
-            // For parasites, classification, etc.
-            let html = "";
-
-            if (microbe.category === "bacterium") {
-                // Gram stain
-                if (microbe.gramStain) {
-                    html += `<span class="badge ${microbe.gramStain === "positive" ? "bg-primary" : "bg-danger"
-                        }">Gram ${microbe.gramStain}</span> `;
-                }
-                // Capsule
-                if (microbe.capsule) {
-                    html += `<span class="badge bg-success">Capsule</span> `;
-                }
-                // Spores
-                if (microbe.spores) {
-                    html += `<span class="badge bg-warning">Spores</span> `;
-                }
-            } else if (microbe.category === "virus") {
-                // Envelope
-                if (microbe.envelope === true) {
-                    html += `<span class="badge bg-success">Enveloped</span> `;
-                } else if (microbe.envelope === false) {
-                    html += `<span class="badge bg-secondary">Non-enveloped</span> `;
-                }
-                // Family
-                if (microbe.virusFamily) {
-                    html += `<span class="badge bg-dark">${microbe.virusFamily}</span> `;
-                }
-            } else if (microbe.category === "parasite") {
-                // Classification
-                if (microbe.classification) {
-                    html += `<span class="badge bg-secondary">${microbe.classification}</span> `;
-                }
-            }
-            return html;
+        if (microbe.flagella && microbe.flagella.presence) {
+          shapeHTML += `<div class="flagella-indicator" style="${getFlagellaPosition(microbe)}"></div>`;
         }
-
-        function renderDetails(microbe) {
-            // We'll show different info depending on category
-            let basicInfo = `<p><strong>Exposure:</strong> ${microbe.exposure || "N/A"
-                }</p>
-      <p><strong>Diseases:</strong> ${microbe.diseases || microbe.associatedDiseases || "N/A"}</p>
-      ${microbe.systemsAffected
-                    ? `<p><strong>Systems Affected:</strong> ${microbe.systemsAffected.join(", ")}</p>`
-                    : ""
-                }
-      <p><strong>Vaccine:</strong> ${microbe.vaccine || "None"}</p>
-      `;
-
-            // Bacteria: show special tests, virulence
-            let extra = "";
-            if (microbe.category === "bacterium") {
-                const virulence = microbe.virulenceFactors
-                    ? microbe.virulenceFactors
-                        .map((v) => `<li>${v.factorName}</li>`)
-                        .join("")
-                    : "<li>None</li>";
-                let tests = "";
-                if (microbe.specialTests) {
-                    tests = Object.entries(microbe.specialTests)
-                        .map(([t, val]) => {
-                            const shortLabel = t.toUpperCase().slice(0, 3);
-                            const badgeClass = val.replace("test-", "");
-                            return `<div class="test-result test-${badgeClass}" 
-                       style="padding:0.2rem 0.6rem;margin:0 0.2rem;border-radius:50%"
-                       title="${t.toUpperCase()} = ${val}">
-                        ${shortLabel}
-                     </div>`;
-                        })
-                        .join("");
-                }
-                extra = `
-          <h6>Virulence Factors</h6>
-          <ul>${virulence}</ul>
-          <h6>Special Tests</h6>
-          <div class="d-flex flex-wrap">${tests}</div>
+      } else if (microbe.category === "virus") {
+        // virus
+        // you wanted genome type + family as a "visual"? 
+        // We'll just do a circle with a label
+        color = microbe.envelope ? "#ffc107" : "#0dcaf0"; // arbitrary
+        shapeHTML = `<div style="width:50px;height:50px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#000;">
+          ${microbe.genomeType ? microbe.genomeType.replace(/[^a-z0-9]/gi,'') : "RNA?"}
+        </div>`;
+      } else if (microbe.category === "parasite") {
+        // parasite
+        color = "#20c997"; // teals
+        // if "morphology" is an object, we won't do [object Object]. We'll do a generic oval 
+        shapeHTML = `<div style="width:60px;height:30px;background:${color};border-radius:15px;"></div>`;
+      } else if (microbe.category === "fungus") {
+        // fungus
+        color = "#adb5bd"; // grayish
+        // Maybe a mushroom shape? We'll do a big circle over small rectangle
+        shapeHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="width:50px;height:25px;border-radius:25px 25px 0 0;background:${color};"></div>
+            <div style="width:10px;height:20px;background:${color};"></div>
+          </div>
         `;
-            } else if (microbe.category === "virus") {
-                // Maybe show genomeType, shapeDetail, replicationSite
-                extra = `
-          <p><strong>Genome Type:</strong> ${microbe.genomeType || ""}</p>
-          <p><strong>Replication Site:</strong> ${microbe.replicationSite || ""}</p>
-          <p><strong>Shape/Size:</strong> ${microbe.shapeDetail || ""} ${microbe.sizeRange || ""}</p>
-          ${microbe.keyProteins ? `<p><strong>Key Proteins:</strong> ${microbe.keyProteins.map(k => k.factorName).join(", ")}</p>` : ""}
-        `;
-            } else if (microbe.category === "parasite") {
-                // Show classification, lifeCycle, etc.
-                extra = `
-          <p><strong>Life Cycle:</strong> ${microbe.lifeCycle || "N/A"}</p>
-          <p><strong>Morphology:</strong> ${microbe.morphology || "N/A"}</p>
-        `;
-            }
-            return basicInfo + extra;
-        }
+      }
 
-        function toggleDetails(btn) {
-            const detailsDiv = btn.parentElement.querySelector(".details");
-            if (!detailsDiv) return;
-            if (detailsDiv.style.display === "none") {
-                detailsDiv.style.display = "block";
-                btn.textContent = "Hide Details";
-            } else {
-                detailsDiv.style.display = "none";
-                btn.textContent = "Toggle Details";
-            }
-        }
-
-        /**********************************************************
-         * MORPHOLOGY DIAGRAM (BASIC, MAINLY FOR BACTERIA DEMO)
-         **********************************************************/
-        function createMorphologyDiagram(microbe) {
-            // We'll do a simple approach:
-            // If bacterium, show shape. If virus or parasite, a small icon.
-            let shapeHTML = "";
-            let color = "#6f42c1"; // default
-            if (microbe.category === "bacterium") {
-                // Gram color
-                color = microbe.gramStain === "negative" ? "#d63384" : "#6f42c1";
-                const shape = (microbe.morphology || "").toLowerCase();
-                if (shape.includes("cocci") || shape.includes("coccus")) {
-                    shapeHTML = `<div style="width:30px;height:30px;background:${color};border-radius:50%;"></div>`;
-                } else {
-                    // default rectangle
-                    shapeHTML = `<div style="width:60px;height:20px;background:${color};border-radius:3px;"></div>`;
-                }
-                // Possibly add flagella if indicated
-                if (microbe.flagella && microbe.flagella.presence) {
-                    shapeHTML += `<div class="flagella-indicator" style="${getFlagellaPosition(microbe)}"></div>`;
-                }
-            } else if (microbe.category === "virus") {
-                // Simple virus icon
-                shapeHTML = `<div style="width:40px;height:40px;background:${color};border-radius:50%;"></div>`;
-            } else if (microbe.category === "parasite") {
-                // A small oval
-                shapeHTML = `<div style="width:50px;height:25px;background:${color};border-radius:12px;"></div>`;
-            }
-
-            return `
-        <div class="morphology-diagram" 
+      return `
+        <div class="morphology-diagram"
              style="position:relative; background:#f8f9fa; border-radius:8px; width:100%; height:150px; display:flex; align-items:center; justify-content:center; margin-bottom:1rem;">
           ${shapeHTML}
         </div>
       `;
+    }
+
+    function getFlagellaPosition(microbe) {
+      if (!microbe.flagella) return "";
+      switch (microbe.flagella.type) {
+        case "polar":
+          return "left:50%; top:10px; transform:translateX(-50%)";
+        case "peritrichous":
+          return "left:10%; top:10px;";
+        default:
+          return "left:10%; top:10px;";
+      }
+    }
+
+    /**************************************************************
+     * RENDER TAGS & DETAILS
+     **************************************************************/
+    function renderBasicTags(microbe) {
+      // For each category, we show relevant info
+      let html = "";
+      if (microbe.category === "bacterium") {
+        if (microbe.gramStain) {
+          html += `<span class="badge ${
+            microbe.gramStain === "positive" ? "bg-primary" : "bg-danger"
+          }">Gram ${microbe.gramStain}</span> `;
         }
-
-        function getFlagellaPosition(microbe) {
-            if (!microbe.flagella) return "";
-            switch (microbe.flagella.type) {
-                case "polar":
-                    return "left:50%; top:15px; transform:translateX(-50%);";
-                case "peritrichous":
-                    return "left: 10%; top:15px;";
-                default:
-                    return "left: 10%; top:15px;";
-            }
+        if (microbe.capsule) {
+          html += `<span class="badge bg-success">Capsule</span> `;
         }
-
-        /**********************************************************
-         * QUIZ MODE
-         **********************************************************/
-        function startQuiz() {
-            STATE.quiz.questions = generateQuizQuestions();
-            STATE.quiz.current = 0;
-            STATE.quiz.score = 0;
-            STATE.quiz.total = STATE.quiz.questions.length;
-            showNextQuestion();
-            updateQuizProgress();
-            document.getElementById("quizScore").textContent = "Score: 0/0";
-            document.getElementById("quizFeedback").innerHTML = "";
+        if (microbe.spores) {
+          html += `<span class="badge bg-warning">Spores</span> `;
         }
+      } else if (microbe.category === "virus") {
+        // Envelope
+        if (microbe.envelope === true) {
+          html += `<span class="badge bg-success">Enveloped</span> `;
+        } else {
+          html += `<span class="badge bg-secondary">Non-Enveloped</span> `;
+        }
+        // Family
+        if (microbe.virusFamily) {
+          html += `<span class="badge bg-dark">${microbe.virusFamily}</span> `;
+        }
+      } else if (microbe.category === "fungus") {
+        // maybe show if it's dimorphic
+        if (microbe.dimorphism) {
+          html += `<span class="badge bg-info">Dimorphic</span> `;
+        }
+        if (microbe.capsule) {
+          html += `<span class="badge bg-success">Capsule</span> `;
+        }
+        if (microbe.spores) {
+          html += `<span class="badge bg-warning">Spores</span> `;
+        }
+      } else if (microbe.category === "parasite") {
+        if (microbe.classification) {
+          html += `<span class="badge bg-secondary">${microbe.classification}</span> `;
+        }
+      }
+      return html;
+    }
 
-        function generateQuizQuestions() {
-            // We'll generate a small variety: 
-            // For bacteria: Gram stain question, special test question
-            // For viruses: enveloped yes/no, maybe "Which family?" 
-            // For parasites: "Which classification?" or "Which route of exposure?"
-            const allQs = [];
+    function renderDetails(microbe) {
+      // We'll show generic fields
+      let info = `
+        <p><strong>Exposure:</strong> ${microbe.exposure || "N/A"}</p>
+      `;
 
-            allMicrobes.forEach((m) => {
-                if (m.category === "bacterium") {
-                    // Gram stain question
-                    if (m.gramStain) {
-                        allQs.push({
-                            question: `What is the Gram stain result for ${m.name}?`,
-                            options: ["positive", "negative"],
-                            correctAnswer: m.gramStain,
-                        });
-                    }
-                    // special test
-                    if (m.specialTests) {
-                        const positives = Object.entries(m.specialTests)
-                            .filter(([_, val]) => val === "test-pos")
-                            .map(([k]) => k);
-                        if (positives.length > 0) {
-                            allQs.push({
-                                question: `Which special test is POSITIVE in ${m.name}?`,
-                                options: positives,
-                                correctAnswer: positives[0], // or random pick
-                            });
-                        }
-                    }
-                } else if (m.category === "virus") {
-                    // envelope question
-                    if (m.envelope !== undefined) {
-                        allQs.push({
-                            question: `Is ${m.name} enveloped?`,
-                            options: ["true", "false"],
-                            correctAnswer: m.envelope ? "true" : "false",
-                        });
-                    }
-                    // family question
-                    if (m.virusFamily) {
-                        allQs.push({
-                            question: `Which family does ${m.name} belong to?`,
-                            options: [m.virusFamily],
-                            correctAnswer: m.virusFamily,
-                        });
-                    }
-                } else if (m.category === "parasite") {
-                    // classification question
-                    if (m.classification) {
-                        allQs.push({
-                            question: `Which classification best describes ${m.name}?`,
-                            options: [m.classification, "Unknown"],
-                            correctAnswer: m.classification,
-                        });
-                    }
-                    // exposure question
-                    if (m.exposure) {
-                        allQs.push({
-                            question: `Which route of exposure is associated with ${m.name}?`,
-                            options: [m.exposure],
-                            correctAnswer: m.exposure,
-                        });
-                    }
-                }
+      let dis = microbe.diseases || microbe.associatedDiseases || "";
+      if (Array.isArray(dis)) {
+        dis = dis.join(", ");
+      }
+      info += `<p><strong>Diseases:</strong> ${dis || "N/A"}</p>`;
+
+      if (microbe.systemsAffected) {
+        info += `<p><strong>Systems Affected:</strong> ${microbe.systemsAffected.join(", ")}</p>`;
+      }
+
+      info += `<p><strong>Vaccine:</strong> ${microbe.vaccine || "None"}</p>`;
+
+      // Bacteria: special tests, virulence
+      if (microbe.category === "bacterium") {
+        // virulence
+        if (microbe.virulenceFactors) {
+          const vf = microbe.virulenceFactors
+            .map((v) => `<li>${v.factorName}</li>`)
+            .join("");
+          info += `<h6>Virulence Factors</h6><ul>${vf || "<li>None</li>"}</ul>`;
+        }
+        // special tests
+        if (microbe.specialTests) {
+          const testsHtml = Object.entries(microbe.specialTests)
+            .map(([testName, val]) => {
+              const short = testName.toUpperCase().slice(0,3);
+              const cls = val.replace("test-", "");
+              return `<div class="test-result test-${cls}" title="${testName.toUpperCase()}: ${val}">
+                ${short}
+              </div>`;
+            })
+            .join("");
+          info += `<h6>Special Tests</h6>
+            <div class="d-flex flex-wrap justify-content-start align-items-center">
+              ${testsHtml}
+            </div>`;
+        }
+      } else if (microbe.category === "virus") {
+        if (microbe.genomeType) {
+          info += `<p><strong>Genome Type:</strong> ${microbe.genomeType}</p>`;
+        }
+        if (microbe.shapeDetail) {
+          info += `<p><strong>Shape Detail:</strong> ${microbe.shapeDetail}</p>`;
+        }
+      } else if (microbe.category === "parasite") {
+        // handle morphology if it’s an object
+        if (typeof microbe.morphology === "object" && microbe.morphology !== null) {
+          info += `<p><strong>Morphology:</strong> ${JSON.stringify(microbe.morphology)}</p>`;
+        } else if (microbe.morphology) {
+          info += `<p><strong>Morphology:</strong> ${microbe.morphology}</p>`;
+        }
+        if (microbe.lifeCycle) {
+          info += `<p><strong>Life Cycle:</strong> ${microbe.lifeCycle}</p>`;
+        }
+      } else if (microbe.category === "fungus") {
+        // We might show dimorphism, shapeDetail, etc. if you have them
+        if (microbe.dimorphism) {
+          info += `<p><strong>Dimorphic:</strong> Yes</p>`;
+        }
+        if (microbe.shapeDetail) {
+          info += `<p><strong>Shape Detail:</strong> ${microbe.shapeDetail}</p>`;
+        }
+      }
+
+      return info;
+    }
+
+    /**************************************************************
+     * QUIZ MODE
+     **************************************************************/
+    function startQuiz() {
+      STATE.quiz.questions = generateQuizQuestions();
+      STATE.quiz.current = 0;
+      STATE.quiz.score = 0;
+      STATE.quiz.total = STATE.quiz.questions.length;
+
+      showNextQuestion();
+      updateQuizProgress();
+      document.getElementById("quizScore").textContent = "Score: 0/0";
+      document.getElementById("quizFeedback").innerHTML = "";
+    }
+
+    function generateQuizQuestions() {
+      // Simple approach: for each microbe, we might create 1 question
+      // e.g., for bacteria we quiz on gram stain or special test
+      // for viruses: envelope or family
+      // for parasite/fungus: minimal question
+      const qArray = [];
+
+      allMicrobes.forEach((m) => {
+        if (m.category === "bacterium") {
+          // Gram
+          if (m.gramStain) {
+            qArray.push({
+              question: `What is the Gram stain result for ${m.name}?`,
+              options: ["positive", "negative"],
+              correctAnswer: m.gramStain,
             });
-
-            // Shuffle
-            allQs.sort(() => Math.random() - 0.5);
-            // Take first 10
-            return allQs.slice(0, 10);
-        }
-
-        function showNextQuestion() {
-            const qData = STATE.quiz.questions[STATE.quiz.current];
-            if (!qData) {
-                // done
-                document.getElementById("quizQuestion").textContent =
-                    "Quiz Complete! Reload or choose another mode.";
-                document.getElementById("quizOptions").innerHTML = "";
-                return;
+          }
+          // special test
+          if (m.specialTests) {
+            const positives = Object.entries(m.specialTests)
+              .filter(([_, val]) => val === "test-pos")
+              .map(([k]) => k);
+            if (positives.length > 0) {
+              qArray.push({
+                question: `Which special test is POSITIVE in ${m.name}?`,
+                options: positives,
+                correctAnswer: positives[0],
+              });
             }
-            document.getElementById("quizQuestion").textContent = qData.question;
+          }
+        } else if (m.category === "virus") {
+          if (typeof m.envelope === "boolean") {
+            qArray.push({
+              question: `Is ${m.name} enveloped?`,
+              options: ["true", "false"],
+              correctAnswer: m.envelope ? "true" : "false",
+            });
+          }
+          if (m.virusFamily) {
+            qArray.push({
+              question: `Which virus family does ${m.name} belong to?`,
+              options: [m.virusFamily],
+              correctAnswer: m.virusFamily,
+            });
+          }
+        } else if (m.category === "parasite") {
+          if (m.classification) {
+            qArray.push({
+              question: `What is the classification of ${m.name}?`,
+              options: [m.classification, "Unknown"],
+              correctAnswer: m.classification,
+            });
+          }
+        } else if (m.category === "fungus") {
+          // maybe ask if it's dimorphic
+          if (m.dimorphism) {
+            qArray.push({
+              question: `Is ${m.name} dimorphic?`,
+              options: ["yes", "no"],
+              correctAnswer: "yes",
+            });
+          }
+        }
+      });
 
-            let optHtml = "";
-            // If the question has a small set of options from the array, 
-            // we might want to add some distractors. For simplicity, we won't.
-            qData.options.forEach((opt, i) => {
-                optHtml += `
+      // shuffle
+      qArray.sort(() => Math.random() - 0.5);
+      return qArray.slice(0, 10);
+    }
+
+    function showNextQuestion() {
+      const qData = STATE.quiz.questions[STATE.quiz.current];
+      if (!qData) {
+        document.getElementById("quizQuestion").textContent =
+          "Quiz Complete! Reload or choose another mode.";
+        document.getElementById("quizOptions").innerHTML = "";
+        return;
+      }
+      document.getElementById("quizQuestion").textContent = qData.question;
+
+      let optHtml = "";
+      qData.options.forEach((opt, i) => {
+        optHtml += `
           <div class="col-md-6">
             <div class="quiz-option p-3 rounded" 
                  style="cursor:pointer; border:1px solid #ccc;" 
-                 onclick="handleAnswer(${i})" data-opt="${opt}">
+                 onclick="handleAnswer(${i})"
+                 data-opt="${opt}">
               ${opt.toUpperCase()}
             </div>
-          </div>`;
-            });
-            document.getElementById("quizOptions").innerHTML = optHtml;
-            document.getElementById("quizFeedback").innerHTML = "";
+          </div>
+        `;
+      });
+      document.getElementById("quizOptions").innerHTML = optHtml;
+      document.getElementById("quizFeedback").innerHTML = "";
+    }
+
+    function handleAnswer(selectedIdx) {
+      const qData = STATE.quiz.questions[STATE.quiz.current];
+      const chosenOpt = qData.options[selectedIdx];
+      const correctOpt = qData.correctAnswer;
+
+      const opts = document.querySelectorAll("#quizOptions .quiz-option");
+      opts.forEach((o) => {
+        const dataOpt = o.getAttribute("data-opt");
+        if (dataOpt === correctOpt) {
+          o.classList.add("correct");
+        } else if (dataOpt === chosenOpt) {
+          o.classList.add("incorrect");
         }
+        o.onclick = null;
+      });
 
-        function handleAnswer(selectedIdx) {
-            const qData = STATE.quiz.questions[STATE.quiz.current];
-            const chosenOpt = qData.options[selectedIdx];
-            const correctOpt = qData.correctAnswer;
+      if (chosenOpt === correctOpt) {
+        STATE.quiz.score++;
+        document.getElementById("quizFeedback").innerHTML = 
+          `<div class='text-success'>Correct!</div>`;
+      } else {
+        document.getElementById("quizFeedback").innerHTML =
+          `<div class='text-danger'>Incorrect! Correct: ${correctOpt}</div>`;
+      }
+      STATE.quiz.current++;
+      document.getElementById("quizScore").textContent = 
+        `Score: ${STATE.quiz.score}/${STATE.quiz.current}`;
 
-            // Mark correct or incorrect in UI
-            const opts = document.querySelectorAll("#quizOptions .quiz-option");
-            opts.forEach((o) => {
-                const dataOpt = o.getAttribute("data-opt");
-                if (dataOpt === correctOpt) {
-                    o.classList.add("correct");
-                } else if (dataOpt === chosenOpt) {
-                    o.classList.add("incorrect");
-                }
-                o.onclick = null;
-            });
+      updateQuizProgress();
 
-            if (chosenOpt === correctOpt) {
-                STATE.quiz.score++;
-                document.getElementById("quizFeedback").innerHTML =
-                    `<div class='text-success'>Correct!</div>`;
-            } else {
-                document.getElementById("quizFeedback").innerHTML =
-                    `<div class='text-danger'>Incorrect! Correct answer: ${correctOpt}</div>`;
-            }
-            STATE.quiz.current++;
-            document.getElementById("quizScore").textContent = `Score: ${STATE.quiz.score}/${STATE.quiz.current}`;
-
-            updateQuizProgress();
-
-            setTimeout(() => {
-                if (STATE.quiz.current < STATE.quiz.total) {
-                    showNextQuestion();
-                } else {
-                    document.getElementById("quizQuestion").textContent =
-                        `Quiz Complete! Final score: ${STATE.quiz.score} / ${STATE.quiz.total}`;
-                    document.getElementById("quizOptions").innerHTML = "";
-                }
-            }, 1500);
+      setTimeout(() => {
+        if (STATE.quiz.current < STATE.quiz.total) {
+          showNextQuestion();
+        } else {
+          document.getElementById("quizQuestion").textContent =
+            `Quiz complete! Final score: ${STATE.quiz.score}/${STATE.quiz.total}`;
+          document.getElementById("quizOptions").innerHTML = "";
         }
+      }, 1500);
+    }
 
-        function updateQuizProgress() {
-            const prog =
-                (STATE.quiz.current / (STATE.quiz.total || 1)) * 100;
-            document.getElementById("quizProgress").style.width = prog + "%";
+    function updateQuizProgress() {
+      const prog =
+        (STATE.quiz.current / (STATE.quiz.total || 1)) * 100;
+      document.getElementById("quizProgress").style.width = prog + "%";
+    }
+
+    /**************************************************************
+     * COMPARE MODE
+     **************************************************************/
+    function loadComparisonSelects() {
+      const select1 = document.getElementById("compareSelect1");
+      const select2 = document.getElementById("compareSelect2");
+      // Sort them by category, then name
+      const sorted = [...allMicrobes].sort((a, b) => {
+        const catOrder = { bacterium: 1, virus: 2, parasite: 3, fungus: 4 };
+        if (a.category !== b.category) {
+          return catOrder[a.category] - catOrder[b.category];
         }
+        return a.name.localeCompare(b.name);
+      });
+      let html = "";
+      sorted.forEach((m) => {
+        html += `<option value="${m.name}">[${m.category}] ${m.name}</option>`;
+      });
+      select1.innerHTML = html;
+      select2.innerHTML = html;
+    }
 
-        /**********************************************************
-         * COMPARISON MODE
-         **********************************************************/
-        function loadComparisonSelects() {
-            const select1 = document.getElementById("compareSelect1");
-            const select2 = document.getElementById("compareSelect2");
-            // build options sorted by category & name
-            const sorted = [...allMicrobes].sort((a, b) => {
-                if (a.category !== b.category) {
-                    // order: bacterium < virus < parasite
-                    const catOrder = { bacterium: 1, virus: 2, parasite: 3 };
-                    return catOrder[a.category] - catOrder[b.category];
-                } else {
-                    return a.name.localeCompare(b.name);
-                }
-            });
-            let optionsHtml = "";
-            sorted.forEach((m) => {
-                optionsHtml += `<option value="${m.name}">[${m.category}] ${m.name}</option>`;
-            });
-            select1.innerHTML = optionsHtml;
-            select2.innerHTML = optionsHtml;
-        }
-
-        function runComparison() {
-            const val1 = document.getElementById("compareSelect1").value;
-            const val2 = document.getElementById("compareSelect2").value;
-            const microbe1 = allMicrobes.find((m) => m.name === val1);
-            const microbe2 = allMicrobes.find((m) => m.name === val2);
-            if (!microbe1 || !microbe2) return;
-
-            const container = document.getElementById("comparisonResults");
-            container.innerHTML = `
-        <div>${createComparisonCard(microbe1)}</div>
-        <div>${createComparisonCard(microbe2)}</div>
+    function runComparison() {
+      const val1 = document.getElementById("compareSelect1").value;
+      const val2 = document.getElementById("compareSelect2").value;
+      const m1 = allMicrobes.find((x) => x.name === val1);
+      const m2 = allMicrobes.find((x) => x.name === val2);
+      if (!m1 || !m2) return;
+      document.getElementById("comparisonResults").innerHTML = `
+        <div>${createComparisonCard(m1)}</div>
+        <div>${createComparisonCard(m2)}</div>
       `;
+    }
+
+    function createComparisonCard(m) {
+      const catLabel =
+        m.category.charAt(0).toUpperCase() + m.category.slice(1);
+      let lines = `<h5>${m.name} (${catLabel})</h5>`;
+      // We'll do a simple bullet list:
+      if (m.category === "bacterium") {
+        lines += `<p>Gram: ${m.gramStain || "N/A"}</p>`;
+        lines += `<p>Capsule: ${m.capsule ? "Yes" : "No"}</p>`;
+        lines += `<p>Spores: ${m.spores ? "Yes" : "No"}</p>`;
+      } else if (m.category === "virus") {
+        lines += `<p>Enveloped: ${
+          m.envelope === true ? "Yes" : "No"
+        }</p>`;
+        lines += `<p>Family: ${m.virusFamily || "N/A"}</p>`;
+        lines += `<p>Genome: ${m.genomeType || "N/A"}</p>`;
+      } else if (m.category === "parasite") {
+        lines += `<p>Classification: ${m.classification || "N/A"}</p>`;
+        // If morphology is object:
+        let morphStr = typeof m.morphology === "object"
+          ? JSON.stringify(m.morphology)
+          : (m.morphology || "");
+        lines += `<p>Morphology: ${morphStr}</p>`;
+      } else if (m.category === "fungus") {
+        if (m.dimorphism) {
+          lines += `<p>Dimorphic: Yes</p>`;
         }
+        lines += `<p>Capsule: ${m.capsule ? "Yes" : "No"}</p>`;
+        lines += `<p>Spores: ${m.spores ? "Yes" : "No"}</p>`;
+      }
 
-        function createComparisonCard(m) {
-            let categoryLabel =
-                m.category.charAt(0).toUpperCase() + m.category.slice(1);
-            let majorInfo = "";
+      const dis = m.diseases || m.associatedDiseases || "N/A";
+      lines += `<p>Diseases: ${
+        Array.isArray(dis) ? dis.join(", ") : dis
+      }</p>`;
 
-            if (m.category === "bacterium") {
-                // Gram, capsule, spores
-                majorInfo += `<p><strong>Gram:</strong> ${m.gramStain || "N/A"}</p>`;
-                majorInfo += `<p><strong>Capsule:</strong> ${m.capsule ? "Yes" : "No"}</p>`;
-                majorInfo += `<p><strong>Spores:</strong> ${m.spores ? "Yes" : "No"}</p>`;
-            } else if (m.category === "virus") {
-                majorInfo += `<p><strong>Enveloped:</strong> ${m.envelope === true ? "Yes" : "No"
-                    }</p>`;
-                majorInfo += `<p><strong>Family:</strong> ${m.virusFamily || "N/A"}</p>`;
-                majorInfo += `<p><strong>Genome:</strong> ${m.genomeType || ""}</p>`;
-            } else if (m.category === "parasite") {
-                majorInfo += `<p><strong>Classification:</strong> ${m.classification || ""}</p>`;
-                majorInfo += `<p><strong>Morphology:</strong> ${m.morphology || ""}</p>`;
-            }
+      if (m.systemsAffected) {
+        lines += `<p>Systems: ${m.systemsAffected.join(", ")}</p>`;
+      }
+      lines += `<p>Vaccine: ${m.vaccine || "None"}</p>`;
+      return `<div class="comparison-card">${lines}</div>`;
+    }
 
-            // Overlap
-            const systems = m.systemsAffected ? m.systemsAffected.join(", ") : "N/A";
-            const disease = m.diseases || m.associatedDiseases || "N/A";
+    /**************************************************************
+     * SPACED REPETITION
+     **************************************************************/
+    function updateSpacedRepetition() {
+      const sorted = [...allMicrobes].sort((a, b) => {
+        const aProg = STATE.progress[a.name]?.nextReview || 0;
+        const bProg = STATE.progress[b.name]?.nextReview || 0;
+        return aProg - bProg;
+      });
 
-            return `
-        <div class="comparison-card">
-          <h5>${m.name} (${categoryLabel})</h5>
-          ${majorInfo}
-          <p><strong>Systems Affected:</strong> ${systems}</p>
-          <p><strong>Diseases:</strong> ${disease}</p>
-          <p><strong>Exposure:</strong> ${m.exposure || "N/A"}</p>
-          <p><strong>Vaccine:</strong> ${m.vaccine || "None"}</p>
-        </div>
-      `;
-        }
+      const list = document.getElementById("spacedList");
+      list.innerHTML = "";
+      sorted.forEach((m) => {
+        const mastery = getMasteryPercent(m);
+        const li = document.createElement("li");
+        li.className = 
+          "spaced-item mb-3 p-2 border rounded d-flex justify-content-between align-items-center";
 
-        /**********************************************************
-         * SPACED REPETITION MODE
-         **********************************************************/
-        function updateSpacedRepetition() {
-            // We'll sort by nextReview
-            const sorted = [...allMicrobes].sort((a, b) => {
-                const progA = STATE.progress[a.name]?.nextReview || 0;
-                const progB = STATE.progress[b.name]?.nextReview || 0;
-                return progA - progB;
-            });
-
-            const list = document.getElementById("spacedList");
-            list.innerHTML = "";
-            sorted.forEach((m) => {
-                const mastery = getMasteryPercent(m);
-                const li = document.createElement("li");
-                li.className =
-                    "spaced-item mb-3 p-2 border rounded d-flex justify-content-between align-items-center";
-
-                li.innerHTML = `
+        li.innerHTML = `
           <div style="flex:1;">
             <h5 style="margin:0;">${m.name} (${m.category})</h5>
             <div class="progress-container" 
-                 style="height: 8px; background: #e9ecef; border-radius:4px; margin:4px 0;">
-              <div class="progress-bar" 
-                   style="width: ${mastery}%; background:#6f42c1; height:100%; transition: width 0.3s;"></div>
+                 style="height:8px; background:#e9ecef; border-radius:4px; margin:4px 0;">
+              <div class="progress-bar"
+                   style="width:${mastery}%; background:#6f42c1; height:100%;">
+              </div>
             </div>
           </div>
           <button class="btn btn-sm btn-outline-primary" onclick="reviewMicrobe('${m.name}')">
             Review Now
           </button>
         `;
-                list.appendChild(li);
-            });
-        }
+        list.appendChild(li);
+      });
+    }
 
-        function getMasteryPercent(m) {
-            const p = STATE.progress[m.name];
-            if (!p || !p.attempts) return 0;
-            return Math.round((p.correct / p.attempts) * 100);
-        }
+    function getMasteryPercent(m) {
+      const p = STATE.progress[m.name];
+      if (!p || !p.attempts) return 0;
+      return Math.round((p.correct / p.attempts) * 100);
+    }
 
-        function reviewMicrobe(mName) {
-            // Minimal approach: ask if user recalled it correctly
-            if (!STATE.progress[mName]) {
-                STATE.progress[mName] = { correct: 0, attempts: 0, nextReview: 0 };
-            }
-            const isCorrect = confirm(
-                `Quick check: Did you recall key facts about ${mName} correctly?\nOK if yes, Cancel if no.`
-            );
-            STATE.progress[mName].attempts++;
-            if (isCorrect) {
-                STATE.progress[mName].correct++;
-            }
-            // schedule nextReview in naive manner
-            const now = Date.now();
-            const dayMs = 86400000;
-            STATE.progress[mName].nextReview = now + (isCorrect ? 2 : 1) * dayMs;
+    function reviewMicrobe(mName) {
+      if (!STATE.progress[mName]) {
+        STATE.progress[mName] = { correct: 0, attempts: 0, nextReview: 0 };
+      }
+      const yes = confirm(`Did you recall key facts about "${mName}"? OK=Yes, Cancel=No`);
+      STATE.progress[mName].attempts++;
+      if (yes) {
+        STATE.progress[mName].correct++;
+      }
+      const now = Date.now();
+      const dayMs = 86400000;
+      // naive approach: +1 day if no, +2 days if yes
+      STATE.progress[mName].nextReview = now + (yes ? 2 : 1) * dayMs;
 
-            localStorage.setItem("microbeProgress", JSON.stringify(STATE.progress));
-            updateSpacedRepetition();
-        }
-    </script>
+      localStorage.setItem("microbeProgress", JSON.stringify(STATE.progress));
+      updateSpacedRepetition();
+    }
+  </script>
 </body>
-
 </html>
