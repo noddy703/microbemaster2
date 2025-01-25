@@ -1,0 +1,121 @@
+:root {
+    --gram-positive: #6f42c1;
+    --gram-negative: #d63384;
+    --aerobic: #0dcaf0;
+    --anaerobic: #ffc107;
+    --correct: #198754;
+    --incorrect: #dc3545;
+}
+
+body {
+    background: #f8f9fa;
+    font-family: 'Segoe UI', system-ui;
+    min-height: 100vh;
+}
+
+.mode-section {
+    display: none;
+}
+
+.active-mode {
+    display: block !important;
+}
+
+.microbe-card {
+    transition: transform 0.3s;
+    border: 3px solid;
+    position: relative;
+}
+
+.microbe-card:hover {
+    transform: translateY(-5px);
+}
+
+.gram-positive {
+    border-color: var(--gram-positive);
+}
+
+.gram-negative {
+    border-color: var(--gram-negative);
+}
+
+.morphology-diagram {
+    width: 100%;
+    height: 150px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    position: relative;
+    margin: 1rem 0;
+}
+
+.flagella-indicator {
+    position: absolute;
+    width: 10px;
+    height: 30px;
+    background: #666;
+    transform-origin: bottom;
+}
+
+.system-pill {
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    display: inline-block;
+    margin: 2px;
+}
+
+.test-result {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 0.8em;
+    cursor: help;
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.spaced-repetition-list {
+    list-style: none;
+    padding: 0;
+}
+
+.spaced-item {
+    background: white;
+    margin: 0.5rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.progress-container {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--gram-positive);
+    transition: width 0.3s ease;
+}
+
+.quiz-option.correct {
+    background: var(--correct) !important;
+    color: white !important;
+}
+
+.quiz-option.incorrect {
+    background: var(--incorrect) !important;
+    color: white !important;
+}
